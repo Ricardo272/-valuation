@@ -8,103 +8,81 @@ var auteursArray = Array.from(auteurs.values())
 document.getElementById('rechercher').addEventListener('click', function () {
     var termeRecherche = document.getElementById('barreDeRecherche').value.toLowerCase();
 
-    // Recherche des auteurs correspondant au terme de recherche
-    var resultatsAuteurs = auteursArray.filter(function (auteur) {
-        return auteur.nom.toLowerCase().includes(termeRecherche);
-    });
+    if (termeRecherche.trim() === '') {
+        afficherMessageErreur();
+    } else {
+        var resultatsAuteurs = auteursArray.filter(function (auteur) {
+            return auteur.nom.toLowerCase().includes(termeRecherche);
+        });
 
-    // Recherche des albums correspondant au terme de recherche
-    var resultatsAlbums = albumsArray.filter(function (album) {
-        return album.titre.toLowerCase().includes(termeRecherche);
-    });
+        var resultatsAlbums = albumsArray.filter(function (album) {
+            return album.titre.toLowerCase().includes(termeRecherche);
+        });
 
-    // Recherche des séries correspondant au terme de recherche
-    var resultatsSeries = seriesArray.filter(function (serie) {
-        return serie.nom.toLowerCase().includes(termeRecherche);
-    });
+        var resultatsSeries = seriesArray.filter(function (serie) {
+            return serie.nom.toLowerCase().includes(termeRecherche);
+        });
 
-    afficherResultats(resultatsAuteurs, resultatsAlbums, resultatsSeries);
+        afficherResultats(resultatsAuteurs, resultatsAlbums, resultatsSeries);
+    }
 });
 
-// Fonction pour afficher les résultats dans la liste
+function afficherMessageErreur() {
+    var cardDiv = document.getElementById('card');
+    cardDiv.innerHTML = `
+
+    <h2 id="titreBD">Titre de la Bande Dessinée</h2>
+
+    <p id="nomAuteur">Auteur: Nom de l'auteur</p>
+
+    <p id="prixAlbum">Prix: XX.XX EUR</p>
+
+    <img id="couvertureBD" src="assets/albums/Arkezone-01-Le dôme.jpg" alt="Couverture de la Bande Dessinée">
+
+    <p id="descriptionAlbum">Description de la bande dessinée...</p> 
+    ` ;
+}
+
+
+
 function afficherResultats(resultatsAuteurs, resultatsAlbums, resultatsSeries) {
     var cardDiv = document.getElementById('card');
     cardDiv.innerHTML = ''; // Efface le contenu précédent de la div card
 
-    // Affichage des résultats des auteurs
-    resultatsAuteurs.forEach(function (auteur) {
-        var p = document.createElement('p');
-        p.textContent = 'Auteur: ' + auteur.nom;
-        cardDiv.appendChild(p);
+    // Fusion de tous les résultats en un seul tableau
+    var tousResultats = [...resultatsAuteurs, ...resultatsAlbums, ...resultatsSeries];
 
-        // Afficher tous les albums de l'auteur
-        var albumsAuteur = albumsArray.filter(function (album) {
-            return album.idAuteur === auteur.id;
-        });
-        albumsAuteur.forEach(function (album) {
-            var albumDiv = document.createElement('div');
-            albumDiv.textContent = 'Album: ' + album.titre + ' | Prix: ' + album.prix + ' EUR';
-            cardDiv.appendChild(albumDiv);
-        });
-
-        // Afficher toutes les séries de l'auteur
-        var seriesAuteur = seriesArray.filter(function (serie) {
-            return albumsAuteur.some(function (album) {
-                return album.idSerie === serie.id;
-            });
-        });
-        seriesAuteur.forEach(function (serie) {
-            var serieDiv = document.createElement('div');
-            serieDiv.textContent = 'Série: ' + serie.nom + ' | Prix: ' + serie.prix + ' EUR';
-            cardDiv.appendChild(serieDiv);
-        });
-    });
-
-    // Affichage des résultats des albums
-    resultatsAlbums.forEach(function (album) {
+    // Parcours de tous les résultats (auteurs, albums et séries)
+    tousResultats.forEach(function (resultat) {
         var div = document.createElement('div');
-        div.textContent = 'Album: ' + album.titre;
-        cardDiv.appendChild(div);
+        if (resultat.nom) {
+            // Résultat est un auteur
+            div.innerHTML = `
 
-        // Récupération de l'auteur correspondant à cet album
-        var auteurAlbum = auteursArray.find(function (auteur) {
-            return auteur.id === album.idAuteur;
-        });
+                <h2>Auteur: ${resultat.nom}</h2>
 
-        if (auteurAlbum) {
-            var auteurDiv = document.createElement('div');
-            auteurDiv.textContent = '   Auteur: ' + auteurAlbum.nom;
-            cardDiv.appendChild(auteurDiv);
+            `;
+        } else if (resultat.titre) {
+            // Résultat est un album
+            div.innerHTML = `
+
+                <h2 id="titreBD">${resultat.titre}</h2>
+
+                <p id="nomAuteur">Auteur: ${resultat.auteur}</p>
+
+                <p id="prixAlbum">Prix: ${resultat.prix} EUR</p>
+
+                <img src="${resultat.image}.png" alt="Couverture de la Bande Dessinée">
+
+            `;
+        } else if (resultat.nom) {
+            // Résultat est une série
+            div.innerHTML = `
+
+                <h2>Série: ${resultat.nom}</h2>
+                
+            `;
         }
-
-        // Afficher tous les albums de la série
-        var albumsSerie = albumsArray.filter(function (alb) {
-            return alb.idSerie === album.idSerie;
-        });
-        albumsSerie.forEach(function (alb) {
-            var albDiv = document.createElement('div');
-            albDiv.textContent = '   - Album: ' + alb.titre + ' | Prix: ' + alb.prix + ' EUR';
-            cardDiv.appendChild(albDiv);
-        });
-    });
-
-    // Affichage des résultats des séries
-    resultatsSeries.forEach(function (serie) {
-        var div = document.createElement('div');
-        div.textContent = 'Série: ' + serie.nom + ' | Prix: ' + serie.prix + ' EUR';
         cardDiv.appendChild(div);
-
-        // Récupération de l'auteur correspondant à cette série
-        var auteurSerie = auteursArray.find(function (auteur) {
-            return auteur.id === serie.idAuteur;
-        });
-
-        if (auteurSerie) {
-            var auteurDiv = document.createElement('div');
-            auteurDiv.textContent = '   Auteur: ' + auteurSerie.nom;
-            cardDiv.appendChild(auteurDiv);
-        }
     });
 }
-
-
