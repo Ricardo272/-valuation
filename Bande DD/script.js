@@ -9,7 +9,7 @@ document.getElementById('rechercher').addEventListener('click', function () {
     var termeRecherche = document.getElementById('barreDeRecherche').value.toLowerCase();
 
     if (termeRecherche.trim() === '') {
-        afficherMessageErreur();
+        afficherDonneesFictives();
     } else {
         var resultatsAuteurs = auteursArray.filter(function (auteur) {
             return auteur.nom.toLowerCase().includes(termeRecherche);
@@ -27,7 +27,7 @@ document.getElementById('rechercher').addEventListener('click', function () {
     }
 });
 
-function afficherMessageErreur() {
+function afficherDonneesFictives() {
     var cardDiv = document.getElementById('card');
     cardDiv.innerHTML = `
 
@@ -58,43 +58,73 @@ function getAlbumImg(album) {
 }
 
 function afficherResultats(resultatsAuteurs, resultatsAlbums, resultatsSeries) {
-    var cardDiv = document.getElementById('card');
-    cardDiv.innerHTML = ''; // Efface le contenu précédent de la div card
+    var cardAlbumsDiv = document.getElementById('cardAlbums');
+    var cardSeriesDiv = document.getElementById('cardSeries');
+    var cardAuteursDiv = document.getElementById('cardAuteurs');
 
-    // Fusion de tous les résultats en un seul tableau
-    var tousResultats = [...resultatsAuteurs, ...resultatsAlbums, ...resultatsSeries];
+    // Nettoie le contenu précédent des divs
+    cardAlbumsDiv.innerHTML = '';
+    cardSeriesDiv.innerHTML = '';
+    cardAuteursDiv.innerHTML = '';
 
-    // Parcours de tous les résultats (auteurs, albums et séries)
-    tousResultats.forEach(function (resultat) {
-        var div = document.createElement('div');
-        if (resultat.nom) {
-            // Résultat est un auteur
-            div.innerHTML = `
+    // Fonction pour générer le contenu HTML pour chaque type de résultat
+    function genererHTML(resultats, type) {
+        var html = '';
+        resultats.forEach(function (resultat) {
+            if (type === 'auteurs') {
+                html += `<div>Auteur: ${resultat.nom}</div>`;
+            } else if (type === 'albums') {
+                html += `<div>Titre: ${resultat.titre}</div>`;
+            } else if (type === 'series') {
+                html += `<div>Série: ${resultat.nom}</div>`;
+            }
+        });
+        return html;
+    }
 
-                <h2>Auteur: ${resultat.nom}</h2>
+    // Génère le contenu HTML pour chaque type de résultat
+    var htmlAuteurs = genererHTML(resultatsAuteurs, 'auteurs');
+    var htmlAlbums = genererHTML(resultatsAlbums, 'albums');
+    var htmlSeries = genererHTML(resultatsSeries, 'series');
 
-            `;
-        } else if (resultat.titre) {
-            // Résultat est un album
-            div.innerHTML = `
-
-                <h2 id="titreBD">${resultat.titre}</h2>
-
-                <p id="nomAuteur">Auteur: ${resultat.auteur}</p>
-
-                <p id="prixAlbum">Prix: ${resultat.prix} EUR</p>
-
-                <img src="assets/albumsMini/${getAlbumImg(resultat)}" alt="Couverture de la Bande Dessinée">
-
-            `;
-        } else if (resultat.nom) {
-            // Résultat est une série
-            div.innerHTML = `
-
-                <h2>Série: ${resultat.nom}</h2>
-                
-            `;
-        }
-        cardDiv.appendChild(div);
-    });
+    // Injecte le contenu HTML dans les divs respectives
+    cardAuteursDiv.innerHTML = htmlAuteurs;
+    cardAlbumsDiv.innerHTML = htmlAlbums;
+    cardSeriesDiv.innerHTML = htmlSeries;
 }
+
+
+// const resultsPerPage = 10; // Nombre de résultats à afficher par page
+// let currentPage = 0; // Page actuelle
+
+// function loadMoreResults() {
+//     const resultsContainer = document.getElementById('resultsContainer');
+
+//     // Calcule l'indice de début et de fin pour les résultats à afficher
+//     const startIndex = currentPage * resultsPerPage;
+//     const endIndex = (currentPage + 1) * resultsPerPage;
+
+//     // Récupère les résultats pour la page actuelle
+//     const currentResults = tousResultats.slice(startIndex, endIndex);
+
+//     // Affiche les résultats dans le conteneur
+//     currentResults.forEach(result => {
+//         const resultElement = document.createElement('div');
+//         // Utilise result pour afficher les détails du résultat
+//         resultElement.textContent = result.nom; // Remplace cette ligne avec la logique d'affichage de ton résultat
+//         resultsContainer.appendChild(resultElement);
+//     });
+
+//     currentPage++; // Passe à la page suivante pour la prochaine fois
+// }
+
+// // Écoute l'événement de défilement de la page
+// window.addEventListener('scroll', () => {
+//     if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+//         // L'utilisateur a atteint le bas de la page, charge plus de résultats
+//         loadMoreResults();
+//     }
+// });
+
+// // Charge les premiers résultats au chargement de la page
+// loadMoreResults();
