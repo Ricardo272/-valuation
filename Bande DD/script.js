@@ -43,7 +43,19 @@ function afficherMessageErreur() {
     ` ;
 }
 
+function getAlbumImg(album) {
+    // nous allons chercher le nom de la série via idSerie de l'album et nous supprimons les caractères spéciaux à l'aide du replace
+    let serieName = series.get(album.idSerie).nom.replace(/'|!|\?|\.|"|:|\$/g, "");
 
+    // Nous supprimons les caractères spéciaux à l'aide du replace
+    let titre = album.titre.replace(/'|!|\?|\.|"|:|\$/g, "");
+
+    // Nous définissons l'extension de l'image
+    let extension = 'jpg';
+
+    // il nous reste plus qu'à retourner le nom de l'image avec le format suivant : {nom-de-la-série}-{numéro-de-l'album}-{titre-de-l'album}.{extension}
+    return `${serieName}-${album.numero}-${titre}.${extension}`;
+}
 
 function afficherResultats(resultatsAuteurs, resultatsAlbums, resultatsSeries) {
     var cardDiv = document.getElementById('card');
@@ -72,7 +84,7 @@ function afficherResultats(resultatsAuteurs, resultatsAlbums, resultatsSeries) {
 
                 <p id="prixAlbum">Prix: ${resultat.prix} EUR</p>
 
-                <img src="${resultat.image}.png" alt="Couverture de la Bande Dessinée">
+                <img src="assets/albumsMini/${getAlbumImg(resultat)}" alt="Couverture de la Bande Dessinée">
 
             `;
         } else if (resultat.nom) {
